@@ -130,6 +130,25 @@
       code {
         color: #9fb3d0;
       }
+      #warn {
+        padding: 14px 12px;
+        background: #3a0f10;
+        color: #ffdede;
+        border-bottom: 2px solid #a5202a;
+        text-align: center;
+        font-weight: 900;
+        font-size: 17px;
+        letter-spacing: 0.08em;
+        line-height: 1.35;
+        text-transform: uppercase;
+        text-shadow: 0 0 6px rgba(255, 60, 60, 0.45);
+        animation: warnpulse 1.6s ease-in-out infinite;
+      }
+      #warn b { color: #ff5666; font-size: 19px; }
+      @keyframes warnpulse {
+        0%, 100% { background: #3a0f10; }
+        50%      { background: #5a1418; }
+      }
       #foot {
         position: fixed;
         left: 0;
@@ -167,6 +186,7 @@
         height="28"
       /><b>Shadow's Services</b>
     </div>
+    <div id="warn">⚠ GOLDHEN IS ONLY FOR <b>13.52</b> FIRMWARE ⚠</div>
     <div id="spin"></div>
     <div id="msg">Restart your console</div>
     <div id="wrap">
