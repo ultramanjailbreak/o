@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GoldHEN Payload Sender</title>
+    <title>GoldHEN ps4debug Injector</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -27,7 +27,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        input[type="text"], input[type="file"] {
+        input[type="text"] {
             width: 100%;
             padding: 10px;
             border: 1px solid #333;
@@ -40,12 +40,13 @@
             background-color: #007acc;
             color: white;
             border: none;
-            padding: 10px 15px;
+            padding: 12px 15px;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
             width: 100%;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            font-weight: bold;
         }
         button:hover {
             background-color: #005999;
@@ -58,17 +59,19 @@
         }
         #status {
             margin-top: 15px;
-            padding: 10px;
+            padding: 12px;
             border-radius: 4px;
             background-color: #2d2d2d;
             font-family: monospace;
+            border-left: 4px solid #007acc;
+            white-space: pre-wrap;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>GoldHEN Payload Injector</h2>
+    <h2>GoldHEN ps4debug Injector</h2>
     
     <div class="form-group">
         <label for="ipAddress">PS4 IP Address:</label>
@@ -76,89 +79,96 @@
     </div>
 
     <div class="form-group">
-        <label for="payloadFile">Select Payload (.bin):</label>
-        <input type="file" id="payloadFile" accept=".bin">
+        <label for="repoUrl">GitHub Raw Payload URL:</label>
+        <input type="text" id="repoUrl" value="https://githubusercontent.com" placeholder="Direct URL to raw .bin file">
     </div>
 
-    <!-- Option 1: Direct Network Injection via Port 9090 -->
-    <button onclick="injectPayloadDirect()">Option 1: Inject Directly (Port 9090)</button>
+    <!-- Option 1: Fetch and send directly to binloader stream -->
+    <button onclick="processPayload('inject')">Option 1: Inject Directly (Port 9090)</button>
     
-    <!-- Option 2: Upload via POST request targeting the payload API on port 9090 -->
-    <button class="btn-alt" onclick="uploadToDataFolder()">Option 2: Upload to /data/payloads (POST via Port 9090)</button>
+    <!-- Option 2: Fetch and POST to storage path -->
+    <button class="btn-alt" onclick="processPayload('upload')">Option 2: Save to /data/payloads (POST via Port 9090)</button>
 
-    <div id="status">Status: Idle</div>
+    <div id="status">Status: Ready to deploy ps4debug.bin</div>
 </div>
 
 <script>
-    function updateStatus(message) {
-        document.getElementById('status').innerText = "Status: " + message;
+    function updateStatus(message, color = "#007acc") {
+        const statusBox = document.getElementById('status');
+        statusBox.innerText = "Status: " + message;
+        statusBox.style.borderLeftColor = color;
     }
 
-    function getPayloadFile() {
-        const fileInput = document.getElementById('payloadFile');
-        if (fileInput.files.length === 0) {
-            alert('Please select a payload file first.');
-            return null;
+    // Master function to handle remote payload retrieval
+    async function processPayload(actionType) {
+        const ip = document.getElementById('ipAddress').value.trim();
+        const githubUrl = document.getElementById('repoUrl').value.trim();
+
+        if (!ip || ip === "192.168.1.") {
+            alert("Please input a valid PS4 IP address.");
+            return;
         }
-        return fileInput.files[0];
-    }
 
-    // Option 1: Direct Network Injection (Port 9090)
-    function injectPayloadDirect() {
-        const ip = document.getElementById('ipAddress').value;
-        const file = getPayloadFile();
-        if (!ip || !file) return;
-
-        updateStatus("Reading file...");
-        const reader = new FileReader();
-        
-        reader.onload = function(e) {
-            const buffer = e.target.result;
-            updateStatus(`Sending payload to ${ip}:9090...`);
+        try {
+            updateStatus("Downloading ps4debug.bin from GitHub...", "#ffc107");
             
-            fetch(`http://${ip}:9090`, {
-                method: 'POST',
-                mode: 'no-cors', 
-                body: buffer
-            })
-            .then(() => {
-                updateStatus("Payload sent successfully to port 9090!");
-            })
-            .catch(err => {
-                updateStatus("Error sending payload: " + err.message);
-            });
-        };
-        
-        reader.readAsArrayBuffer(file);
+            // Retrieve file array stream directly from GitHub repository
+            const response = await fetch(githubUrl);
+            if (!response.ok) throw new Error(`Failed to fetch from GitHub (${response.statusText})`);
+            
+            const payloadBuffer = await response.arrayBuffer();
+            updateStatus("Download complete. Preparing delivery...", "#ffc107");
+
+            if (actionType === 'inject') {
+                sendDirect(ip, payloadBuffer);
+            } else if (actionType === 'upload') {
+                sendToDataFolder(ip, payloadBuffer);
+            }
+
+        } catch (error) {
+            updateStatus("Error fetching payload: " + error.message, "#dc3545");
+        }
     }
 
-    // Option 2: Sends an HTTP POST request to save the file into /data/payloads via port 9090
-    function uploadToDataFolder() {
-        const ip = document.getElementById('ipAddress').value;
-        const file = getPayloadFile();
-        if (!ip || !file) return;
+    // Deliver binary stream to Port 9090 via No-CORS stream injection
+    function sendDirect(ip, buffer) {
+        updateStatus(`Injecting ps4debug into stream running at ${ip}:9090...`, "#ffc107");
 
-        updateStatus("Preparing upload to /data/payloads...");
-        
+        fetch(`http://${ip}:9090`, {
+            method: 'POST',
+            mode: 'no-cors',
+            body: buffer
+        })
+        .then(() => {
+            updateStatus("Payload packet successfully broadcasted to Port 9090! Check your PS4 display.", "#28a745");
+        })
+        .catch(err => {
+            updateStatus("Direct injection failure: " + err.message, "#dc3545");
+        });
+    }
+
+    // Deliver file contents via HTTP POST multipart construct to destination storage 
+    function sendToDataFolder(ip, buffer) {
+        updateStatus(`Uploading binary data structure to http://${ip}:9090/data/payloads...`, "#ffc107");
+
+        // Convert the buffer array into an actual pseudo file entity
+        const blob = new Blob([buffer], { type: "application/octet-stream" });
         const formData = new FormData();
-        formData.append("file", file, file.name);
+        formData.append("file", blob, "ps4debug.bin");
 
-        // Targeted custom endpoint URL configured for port 9090
-        const uploadUrl = `http://${ip}:9090/data/payloads`;
-
-        fetch(uploadUrl, {
+        fetch(`http://${ip}:9090/data/payloads`, {
             method: 'POST',
             body: formData
         })
-        .then(response => {
-            if (response.ok) {
-                updateStatus(`Successfully uploaded ${file.name} to /data/payloads via port 9090!`);
+        .then(res => {
+            if (res.ok) {
+                updateStatus("Successfully stored ps4debug.bin directly inside /data/payloads!", "#28a745");
             } else {
-                updateStatus(`Server responded with status: ${response.status}`);
+                updateStatus(`Server rejected store routine. Code: ${res.status}`, "#dc3545");
             }
         })
         .catch(err => {
-            updateStatus("Upload failed: " + err.message);
+            updateStatus("Storage delivery pipeline error: " + err.message, "#dc3545");
         });
     }
 </script>
