@@ -1,263 +1,167 @@
-<!doctype html>
-<html lang="en" manifest="cache.appcache">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>Shadow's Services &middot; PS4Debug</title>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GoldHEN Payload Sender</title>
     <style>
-      html, body {
-        margin: 0;
-        padding: 0;
-        min-height: 100%;
-        background: #0b0d10;
-        color: #c8ced8;
-        font: 15px/1.45 "Segoe UI", system-ui, sans-serif;
-      }
-      #brand {
-        text-align: center;
-        padding: 8px 10px;
-        background: #0e1116;
-        border-bottom: 1px solid #1e2732;
-      }
-      #brand img {
-        width: 28px;
-        height: 28px;
-        margin-right: 8px;
-        border-radius: 50%;
-        vertical-align: middle;
-      }
-      #brand b {
-        font-size: 15px;
-        font-weight: 700;
-        letter-spacing: 0.14em;
-        color: #e6ebf2;
-        vertical-align: middle;
-      }
-      #note {
-        padding: 12px 14px;
-        background: #10221a;
-        color: #cfe9d8;
-        border-bottom: 1px solid #1e3a2a;
-        text-align: center;
-        font-weight: 600;
-        font-size: 14px;
-        letter-spacing: 0.04em;
-      }
-      #note b { color: #7fd0a0; }
-
-      #wrap {
-        padding: 20px 18px 90px;
-        text-align: center;
-      }
-      #hdr {
-        font-size: 22px;
-        font-weight: 700;
-        letter-spacing: 0.04em;
-        color: #e6ebf2;
-        margin: 6px 0 8px;
-      }
-      #tag {
-        font-size: 13px;
-        color: #8b95a3;
-        margin: 0 0 22px;
-      }
-      #tag code {
-        color: #9fb3d0;
-        background: #11151b;
-        padding: 1px 6px;
-        border-radius: 4px;
-        border: 1px solid #1e2732;
-      }
-
-      #inject {
-        display: inline-block;
-        padding: 16px 26px;
-        font: 700 17px/1 "Segoe UI", system-ui, sans-serif;
-        letter-spacing: 0.09em;
-        text-transform: uppercase;
-        color: #0b0d10;
-        background: #7fd0a0;
-        border: 0;
-        border-radius: 6px;
-        cursor: pointer;
-        outline: none;
-        box-shadow: 0 0 0 2px #0b0d10, 0 0 0 4px transparent;
-      }
-      #inject:focus, #inject:hover {
-        box-shadow: 0 0 0 2px #0b0d10, 0 0 0 4px #7fd0a0;
-      }
-      #inject:disabled {
-        background: #3a4652;
-        color: #8b95a3;
-        cursor: default;
-      }
-      #status {
-        margin-top: 22px;
-        font-size: 14px;
-        min-height: 20px;
-      }
-      #status.ok   { color: #7fd0a0; }
-      #status.bad  { color: #d08a7f; }
-      #status.warn { color: #d8c07f; }
-
-      #log {
-        margin: 18px auto 0;
-        max-width: 640px;
-        text-align: left;
-        white-space: pre-wrap;
-        font: 12px/1.45 Consolas, monospace;
-        background: #11151b;
-        border: 1px solid #1e2732;
-        border-radius: 5px;
-        padding: 10px 12px;
-        color: #9fb3d0;
-        display: none;
-      }
-      body.showlog #log { display: block; }
-
-      #row {
-        margin-top: 14px;
-        font-size: 12px;
-        color: #5c6672;
-      }
-      #row a {
-        color: #7fa0c6;
-        text-decoration: none;
-        margin: 0 8px;
-      }
-
-      #foot {
-        position: fixed;
-        left: 0;
-        right: 0;
-        bottom: 6px;
-        text-align: center;
-        font-size: 12px;
-        color: #5c6672;
-        letter-spacing: 0.06em;
-        pointer-events: none;
-        line-height: 1.5;
-      }
-      #foot b { color: #8b95a3; font-weight: 600; }
-      #foot a {
-        color: #7fa0c6;
-        text-decoration: none;
-        pointer-events: auto;
-      }
-      #foot .hint {
-        color: #4c5560;
-        font-style: italic;
-        margin-left: 4px;
-      }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .container {
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #333;
+            border-radius: 4px;
+            background-color: #2a2a2a;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background-color: #005999;
+        }
+        .btn-alt {
+            background-color: #28a745;
+        }
+        .btn-alt:hover {
+            background-color: #218838;
+        }
+        #status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 4px;
+            background-color: #2d2d2d;
+            font-family: monospace;
+        }
     </style>
-  </head>
-  <body>
-    <div id="brand">
-      <img src="logo_raw.png" alt="" width="28" height="28" /><b>Shadow's Services</b>
-    </div>
-    <div id="note">GoldHEN's binloader must be running &middot; port <b>9090</b></div>
-    <div id="wrap">
-      <div id="hdr">PS4Debug Injector</div>
-      <div id="tag">POSTs <code>ps4debug.bin</code> to <code>http://127.0.0.1:9090</code></div>
-      <button id="inject" type="button">Inject PS4Debug on port 9090</button>
-      <div id="status">idle</div>
-      <div id="log"></div>
-      <div id="row">
-        <a href="#" id="togglelog">show log</a>
-        <a href="jb.html">back to jailbreak</a>
-      </div>
-    </div>
-    <div id="foot">
-      discord <b>@whiteshadow8500</b> &middot;
-      <a href="https://discord.gg/pBwXGu37HR">discord.gg/pBwXGu37HR</a>
-      <span class="hint">(donations inside)</span>
-    </div>
-    <script>
-      (function () {
-        var params = new URLSearchParams(location.search);
-        var HOST = params.get("host") || 192.168.10.36";
-        var PORT = params.get("port") || "9090";
-        var URL_ = "http://" + HOST + ":" + PORT + "/";
+</head>
+<body>
 
-        var btn = document.getElementById("inject");
-        var st = document.getElementById("status");
-        var log = document.getElementById("log");
-        var togglelog = document.getElementById("togglelog");
-        var tag = document.getElementById("tag");
-        tag.innerHTML =
-          "POSTs <code>ps4debug.bin</code> to <code>" + URL_ + "</code>";
+<div class="container">
+    <h2>GoldHEN Payload Injector</h2>
+    
+    <div class="form-group">
+        <label for="ipAddress">PS4 IP Address:</label>
+        <input type="text" id="ipAddress" placeholder="e.g., 192.168.1.100" value="192.168.1.">
+    </div>
 
-        function set(msg, cls) {
-          st.textContent = msg;
-          st.className = cls || "";
+    <div class="form-group">
+        <label for="payloadFile">Select Payload (.bin):</label>
+        <input type="file" id="payloadFile" accept=".bin">
+    </div>
+
+    <!-- Option 1: Direct Network Injection via Port 9090 -->
+    <button onclick="injectPayloadDirect()">Option 1: Inject Directly (Port 9090)</button>
+    
+    <!-- Option 2: Upload via POST request targeting the payload API on port 9090 -->
+    <button class="btn-alt" onclick="uploadToDataFolder()">Option 2: Upload to /data/payloads (POST via Port 9090)</button>
+
+    <div id="status">Status: Idle</div>
+</div>
+
+<script>
+    function updateStatus(message) {
+        document.getElementById('status').innerText = "Status: " + message;
+    }
+
+    function getPayloadFile() {
+        const fileInput = document.getElementById('payloadFile');
+        if (fileInput.files.length === 0) {
+            alert('Please select a payload file first.');
+            return null;
         }
-        function line(s) {
-          log.textContent += (log.textContent ? "\n" : "") + s;
-          log.scrollTop = log.scrollHeight;
-        }
+        return fileInput.files[0];
+    }
 
-        togglelog.addEventListener("click", function (e) {
-          e.preventDefault();
-          document.body.classList.toggle("showlog");
-          togglelog.textContent = document.body.classList.contains("showlog")
-            ? "hide log"
-            : "show log";
-        });
+    // Option 1: Direct Network Injection (Port 9090)
+    function injectPayloadDirect() {
+        const ip = document.getElementById('ipAddress').value;
+        const file = getPayloadFile();
+        if (!ip || !file) return;
 
-        btn.addEventListener("click", async function () {
-          btn.disabled = true;
-          set("fetching ps4debug.bin ...", "warn");
-          line("target = " + URL_);
-          var blob;
-          try {
-            var r = await fetch("ps4debug.bin", { cache: "reload" });
-            if (!r.ok) throw new Error("HTTP " + r.status);
-            blob = new Uint8Array(await r.arrayBuffer());
-            line("ps4debug.bin: " + blob.length + " bytes");
-            if (blob.length === 0) throw new Error("empty payload");
-            if (blob[0] !== 0xe9) {
-              line("WARN head=0x" + blob[0].toString(16) + " (expected 0xe9)");
-            }
-          } catch (e) {
-            set("payload load failed: " + (e && e.message || e), "bad");
-            line("FETCH ERR: " + (e && e.message || e));
-            btn.disabled = false;
-            return;
-          }
-
-          set("injecting on " + HOST + ":" + PORT + " ...", "warn");
-          try {
-            var res = await fetch(URL_, {
-              method: "POST",
-              mode: "no-cors",
-              body: blob,
-              headers: { "Content-Type": "application/octet-stream" },
+        updateStatus("Reading file...");
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const buffer = e.target.result;
+            updateStatus(`Sending payload to ${ip}:9090...`);
+            
+            fetch(`http://${ip}:9090`, {
+                method: 'POST',
+                mode: 'no-cors', 
+                body: buffer
+            })
+            .then(() => {
+                updateStatus("Payload sent successfully to port 9090!");
+            })
+            .catch(err => {
+                updateStatus("Error sending payload: " + err.message);
             });
-            line(
-              "POST returned: type=" + res.type +
-              " status=" + (res.status || "(opaque)"),
-            );
-            set(
-              "sent " + blob.length + " bytes to " + HOST + ":" + PORT +
-              " -- check the console for PS4Debug",
-              "ok",
-            );
-          } catch (e) {
-            var msg = (e && e.message) || String(e);
-            line("POST ERR: " + msg);
-            if (/Failed to fetch|NetworkError|refused|reset/i.test(msg)) {
-              set(
-                "connection to " + HOST + ":" + PORT + " refused -- is" +
-                " GoldHEN's binloader running?",
-                "bad",
-              );
+        };
+        
+        reader.readAsArrayBuffer(file);
+    }
+
+    // Option 2: Sends an HTTP POST request to save the file into /data/payloads via port 9090
+    function uploadToDataFolder() {
+        const ip = document.getElementById('ipAddress').value;
+        const file = getPayloadFile();
+        if (!ip || !file) return;
+
+        updateStatus("Preparing upload to /data/payloads...");
+        
+        const formData = new FormData();
+        formData.append("file", file, file.name);
+
+        // Targeted custom endpoint URL configured for port 9090
+        const uploadUrl = `http://${ip}:9090/data/payloads`;
+
+        fetch(uploadUrl, {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => {
+            if (response.ok) {
+                updateStatus(`Successfully uploaded ${file.name} to /data/payloads via port 9090!`);
             } else {
-              set("inject failed: " + msg, "bad");
+                updateStatus(`Server responded with status: ${response.status}`);
             }
-          }
-          btn.disabled = false;
+        })
+        .catch(err => {
+            updateStatus("Upload failed: " + err.message);
         });
-      })();
-    </script>
-  </body>
+    }
+</script>
+
+</body>
 </html>
