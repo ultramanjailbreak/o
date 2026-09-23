@@ -42,6 +42,10 @@ if (SHOW_LOG && document.body) document.body.className = "log";
 function finishUI(ok) {
   if (SHOW_LOG || !document.body) return;
   document.body.className = ok ? "done" : "fail";
+  if (ok) {
+    const btn = document.getElementById("ps4dbg-btn");
+    if (btn) btn.focus();
+  }
 }
 function mark(tag, detail) {
   const raw = detail;
@@ -3126,82 +3130,11 @@ let allDone = false,
               mark("JB-TDUCRED-THREW", (e6 && e6.message) || String(e6));
             }
 
-            // If the main payload started, immediately chain-load ps4debug
-            // into the same WebKit process using the still-armed primitives.
-            // No user prompt / no long await -- we run this straight through
-            // so the primed-exploit window stays as tight as raw13g's
-            // vanilla flow (1-2 s of extra syscalls vs the ~90 s user-wait
-            // an earlier button-based version added). Opt out with
-            // ?ps4debug=0 in the URL.
-            if (payloadRunning && params.get("ps4debug") !== "0") {
-              try {
-                const r = await fetch("ps4debug.bin", { cache: "reload" });
-                if (!r.ok) throw new Error("HTTP " + r.status);
-                const blob = new Uint8Array(await r.arrayBuffer());
-                if (blob.length === 0) throw new Error("empty payload");
-                if (blob[0] !== 0xe9)
-                  throw new Error(
-                    "head=0x" + blob[0].toString(16) + " (expected 0xe9)",
-                  );
-                mark(
-                  "PS4DEBUG-BLOB",
-                  "bytes=" + blob.length + " head=e9-ok",
-                );
-
-                const sz = (blob.length + 0x3fff) & ~0x3fff;
-                const m = sc(SYS.mmap, 0, sz, 7, 0x1002, -1, 0);
-                const entry = new int64(m.lo, m.hi);
-                if (m.i32 === -1)
-                  throw new Error("mmap failed errno=" + errno());
-                if (entry.hi >>> 0 === 0)
-                  throw new Error("mmap returned low addr " + entry);
-                mark(
-                  "PS4DEBUG-MAP",
-                  "mmap(rwx,0x" + sz.toString(16) + ")=" + entry,
-                );
-
-                for (let o = 0; o < blob.length; o += 8) {
-                  let lo = 0,
-                    hi = 0;
-                  for (let k = 0; k < 4; k++)
-                    lo |= (blob[o + k] || 0) << (8 * k);
-                  for (let k = 0; k < 4; k++)
-                    hi |= (blob[o + 4 + k] || 0) << (8 * k);
-                  p.write8(entry.add32(o), new int64(lo >>> 0, hi >>> 0));
-                }
-                let bad = -1;
-                for (let o = 0; o < blob.length && bad < 0; o++)
-                  if (p.read1(entry.add32(o)) !== blob[o]) bad = o;
-                if (bad >= 0)
-                  throw new Error("copy mismatch @0x" + bad.toString(16));
-                mark("PS4DEBUG-COPY", "bytes=" + blob.length + " ok");
-
-                const slot = webkitBase.add32(off.wk___imp_pthread_create);
-                const fn = p.read8(slot);
-                const expect = libkernelBase.add32(off.k_pthread_create);
-                if (fn.low !== expect.low || fn.hi !== expect.hi)
-                  throw new Error("pthread_create slot moved got=" + fn);
-                const thr = new ArrayBuffer(8);
-                keepAlive.push(thr);
-                new Uint8Array(thr).fill(0);
-                const rc = callAddr(expect, [bufAddr(thr), 0, entry, 0]).i32;
-                const tdv = new DataView(thr);
-                const handle = new int64(
-                  tdv.getUint32(0, true),
-                  tdv.getUint32(4, true),
-                );
-                if (rc !== 0 || handle.hi >>> 0 === 0)
-                  throw new Error(
-                    "pthread_create rc=" + rc + " handle=" + handle,
-                  );
-                mark("PS4DEBUG-RUN", "rc=" + rc + " handle=" + handle);
-              } catch (ePs4Dbg) {
-                mark(
-                  "PS4DEBUG-THREW",
-                  (ePs4Dbg && ePs4Dbg.message) || String(ePs4Dbg),
-                );
-              }
-            }
+            // ps4debug is loaded from a separate page once GoldHEN is up:
+            // the standalone injector at ps4debug.html POSTs ps4debug.bin to
+            // GoldHEN's port-9090 binloader instead of chain-loading it in
+            // the primed WebKit process. finishUI() surfaces a button that
+            // navigates there when payloadRunning is true.
 
             if (jbRestoreHook && !KEEP_JB) jbRestoreHook("end-of-run");
             else if (jbRestoreHook) {

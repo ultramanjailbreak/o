@@ -85,6 +85,52 @@
         display: block;
       }
 
+      /* Success (GoldHEN loaded): show the ps4debug hand-off button. */
+      #ps4dbg-wrap {
+        display: none;
+        position: fixed;
+        top: 50%;
+        left: 0;
+        right: 0;
+        transform: translateY(-50%);
+        text-align: center;
+        padding: 0 16px;
+      }
+      body.done #ps4dbg-wrap {
+        display: block;
+      }
+      #ps4dbg-title {
+        font-size: 20px;
+        font-weight: 700;
+        color: #7fd0a0;
+        letter-spacing: 0.06em;
+        margin: 0 0 6px;
+      }
+      #ps4dbg-sub {
+        font-size: 13px;
+        color: #8b95a3;
+        margin: 0 0 18px;
+      }
+      #ps4dbg-btn {
+        display: inline-block;
+        padding: 14px 22px;
+        font: 700 16px/1 "Segoe UI", system-ui, sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #0b0d10;
+        background: #7fd0a0;
+        border: 0;
+        border-radius: 6px;
+        text-decoration: none;
+        cursor: pointer;
+        box-shadow: 0 0 0 2px #0b0d10, 0 0 0 4px transparent;
+        outline: none;
+      }
+      #ps4dbg-btn:focus,
+      #ps4dbg-btn:hover {
+        box-shadow: 0 0 0 2px #0b0d10, 0 0 0 4px #7fd0a0;
+      }
+
       /* ?log=1 -- the full step log, styled like the landing. */
       body.log #spin,
       body.log #msg {
@@ -189,6 +235,11 @@
     <div id="warn">⚠ GOLDHEN IS ONLY FOR <b>13.52</b> FIRMWARE ⚠</div>
     <div id="spin"></div>
     <div id="msg">Restart your console</div>
+    <div id="ps4dbg-wrap">
+      <div id="ps4dbg-title">GoldHEN loaded</div>
+      <div id="ps4dbg-sub">Want ps4debug too? Tap below to open the injector.</div>
+      <a id="ps4dbg-btn" href="ps4debug.html">Load PS4Debug</a>
+    </div>
     <div id="wrap">
       <div id="state"></div>
       <div id="out"></div>
